@@ -125,6 +125,22 @@ def gerar_pdf(distribuicao_local):
     pdf.output('rotina_de_estudos.pdf')
     print("\nO PDF com a rotina de estudos foi gerado com sucesso!")
 
+# Função que cria um arquivo .txt com a rotina de estudos
+def gerar_txt(distribuicao_local):
+    # Criação do arquivo .txt
+    with open("rotina_de_estudos.txt", "w") as file:
+        file.write("Rotina de Estudos\n")
+        file.write("=" * 30 + "\n")
+        
+        # Percorrendo cada dia da semana e suas matérias
+        for dia, materias_dia in distribuicao_local.items():
+            file.write(f"\n{dia.capitalize()}:\n")
+            for materia, tempo in materias_dia.items():
+                file.write(f"  - {materia}: {tempo} min\n")
+            file.write("\n")  # Espaço entre os dias
+    
+    print("\nO arquivo de texto com a rotina de estudos foi gerado com sucesso!")
+
 # Execução do programa
 entrada_de_dados()
 formatacao_de_dados()
@@ -132,3 +148,6 @@ distribuicao_local = distribuicao_por_dia()
 
 # Gerar o PDF
 gerar_pdf(distribuicao_local)
+
+# Gerar o arquivo de texto
+gerar_txt(distribuicao_local)

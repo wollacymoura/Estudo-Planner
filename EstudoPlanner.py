@@ -1,4 +1,4 @@
-# Estudo Planner
+from fpdf import FPDF
 
 # Dicionário para armazenar os minutos disponíveis por dia da semana
 dias_da_semana = {
@@ -97,15 +97,38 @@ def distribuicao_por_dia():
             ultima_materia = list(distribuicao_local[dia].keys())[-1]
             distribuicao_local[dia][ultima_materia] += diferenca
 
-    # Impressão final da rotina de estudos
-    print("\nRotina de estudos por dia:\n" + "="*30)
-    for dia, materias_dia in distribuicao_local.items():
-        print(f"\n{dia.capitalize()}:")
-        for materia, tempo in materias_dia.items():
-            print(f"  - {materia}: {tempo} min")
     return distribuicao_local
+
+# Função que cria um PDF com a rotina de estudos
+def gerar_pdf(distribuicao_local):
+    # Criação do objeto PDF
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    
+    # Título do PDF
+    pdf.set_font('Arial', 'B', 16)
+    pdf.cell(200, 10, 'Rotina de Estudos', ln=True, align='C')
+    pdf.ln(10)  # Linha em branco
+    
+    # Definindo o estilo para o corpo do PDF
+    pdf.set_font('Arial', '', 12)
+
+    # Percorrendo cada dia da semana e suas matérias
+    for dia, materias_dia in distribuicao_local.items():
+        pdf.cell(200, 10, dia.capitalize() + ":", ln=True)
+        for materia, tempo in materias_dia.items():
+            pdf.cell(200, 10, f"  - {materia}: {tempo} min", ln=True)
+        pdf.ln(5)  # Espaço entre os dias
+
+    # Salvar o arquivo PDF
+    pdf.output('rotina_de_estudos.pdf')
+    print("\nO PDF com a rotina de estudos foi gerado com sucesso!")
 
 # Execução do programa
 entrada_de_dados()
 formatacao_de_dados()
-distribuicao_por_dia()
+distribuicao_local = distribuicao_por_dia()
+
+# Gerar o PDF
+gerar_pdf(distribuicao_local)

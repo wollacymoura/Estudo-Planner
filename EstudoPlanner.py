@@ -1,4 +1,5 @@
 from fpdf import FPDF
+import os
 
 # Dicionário para armazenar os minutos disponíveis por dia da semana
 dias_da_semana = {
@@ -14,43 +15,19 @@ dias_da_semana = {
 # Dicionário para armazenar matérias, cada uma com peso e tempo de estudo
 materias = {}
 
-# Função que coleta dados do usuário sobre tempo disponível e matérias
-def entrada_de_dados():
-    print("Informe quantos minutos você tem disponíveis por dia para estudar:")
-    for dia in dias_da_semana:
-        while True:
-            try:
-                tempo = int(input(f"{dia.capitalize()}: "))
-                dias_da_semana[dia] = tempo
-                break
-            except ValueError:
-                print("Por favor, insira um número inteiro válido.")
-
-    while True:
-        try:
-            qtd_materias = int(input("\nQuantas matérias você deseja cadastrar? "))
-            break
-        except ValueError:
-            print("Por favor, insira um número inteiro válido.")
-
-    for i in range(qtd_materias):
-        nome = input(f"\nNome da {i+1}ª matéria: ")
-        while True:
-            try:
-                peso = int(input(f"Peso (1 a 4) para {nome}: "))
-                if 1 <= peso <= 4:
-                    break
-                else:
-                    print("O peso deve ser entre 1 e 4.")
-            except ValueError:
-                print("Por favor, insira um número inteiro válido.")
-        materias[nome] = {"peso": peso}
-
 # Função que calcula o tempo ideal de estudo para cada matéria com base nos pesos
 def formatacao_de_dados():
-    tempo_total = sum(dias_da_semana.values())  # Soma total de tempo disponível na semana
-    peso_total = sum(materia["peso"] for materia in materias.values())  # Soma total dos pesos
-    tempo_medio_por_peso = tempo_total / peso_total  # Quanto vale cada ponto de peso em minutos
+    # Validação: só some se todos os valores forem inteiros e não None
+    if not materias or any(v is None for v in dias_da_semana.values()):
+        raise ValueError("Preencha todos os dias e matérias antes de calcular.")
+
+    tempo_total = sum(dias_da_semana.values())
+    peso_total = sum(materia["peso"] for materia in materias.values())
+
+    if tempo_total == 0 or peso_total == 0:
+        raise ValueError("Tempo total da semana ou soma dos pesos das matérias não pode ser zero.")
+
+    tempo_medio_por_peso = tempo_total / peso_total
 
     tempo_acumulado = 0
     materias_lista = list(materias.items())
@@ -58,12 +35,12 @@ def formatacao_de_dados():
     for i, (nome, dados) in enumerate(materias_lista):
         peso = dados["peso"]
         if i == len(materias_lista) - 1:
-            tempo = tempo_total - tempo_acumulado  # Garante que o tempo total será 100% utilizado
+            tempo = tempo_total - tempo_acumulado
         else:
             tempo = round(peso * tempo_medio_por_peso)
             tempo_acumulado += tempo
 
-        materias[nome]["tempo"] = tempo  # Armazena o tempo ideal para a matéria
+        materias[nome]["tempo"] = tempo
 
 # Função que distribui o tempo de cada matéria entre os dias da semana proporcionalmente
 def distribuicao_por_dia():
@@ -134,7 +111,12 @@ def gerar_pdf(distribuicao_local):
             pdf.cell(cell_width, cell_height, f"{tempo} min", border=1, align='C')
         pdf.ln(cell_height)
 
-    pdf.output('rotina_de_estudos.pdf')
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir)
+    pdf_path = os.path.join(static_dir, 'rotina_de_estudos.pdf')
+
+    pdf.output(pdf_path)
     print("\nO PDF com a rotina de estudos foi gerado com sucesso!")
 
 # Função que cria um arquivo .txt com a rotina de estudos
@@ -154,14 +136,3 @@ def gerar_txt(distribuicao_local):
             file.write("\n")  # Espaço entre os dias
     
     print("\nO arquivo de texto com a rotina de estudos foi gerado com sucesso!")
-
-# Execução do programa
-entrada_de_dados()
-formatacao_de_dados()
-distribuicao_local = distribuicao_por_dia()
-
-# Gerar o PDF
-gerar_pdf(distribuicao_local)
-
-# Gerar o arquivo de texto
-gerar_txt(distribuicao_local)

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home.css') }}"
+    />
+    <title>Estudo Planner</title>
+    <style>
+      html {
+        height: 100vh;
+        width: 100vw;
+      }
+      body {
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #title {
+        color: #333;
+        align-self: center;
+      }
+
+      main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 80%;
+        height: 80%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <form action="/" method="POST">
+        <h1 id="title">Estudo Planner</h1>
+        <h2>Tempo disponível por dia (minutos):</h2>
+        <input
+          type="number"
+          name="segunda"
+          placeholder="Segunda-feira"
+          required
+        />
+        <input type="number" name="terça" placeholder="Terça-feira" required />
+        <input
+          type="number"
+          name="quarta"
+          placeholder="Quarta-feira"
+          required
+        />
+        <input
+          type="number"
+          name="quinta"
+          placeholder="Quinta-feira"
+          required
+        />
+        <input type="number" name="sexta" placeholder="Sexta-feira" required />
+        <input type="number" name="sábado" placeholder="Sábado" required />
+        <input type="number" name="domingo" placeholder="Domingo" required />
+
+        <h2>Matérias</h2>
+        <div id="materias">
+          <div class="materia">
+            <input
+              type="text"
+              name="materia_nome_1"
+              placeholder="Nome da matéria"
+              required
+            />
+            <input
+              type="number"
+              name="materia_peso_1"
+              placeholder="Peso (1-4)"
+              min="1"
+              max="4"
+              required
+            />
+          </div>
+        </div>
+        <button type="button" onclick="adicionarMateria()">
+          Adicionar outra Matéria
+        </button>
+        <button type="submit">Gerar Rotina</button>
+      </form>
+      {% if resultado %}
+      <h2>Rotina de Estudos:</h2>
+      <a
+        href="{{ url_for('static', filename='rotina_de_estudos.pdf') }}"
+        target="_blank"
+        >Visualizar PDF</a
+      >
+      {% endif %}
+    </main>
+    <script>
+      let materiaCount = 1;
+      function adicionarMateria() {
+        materiaCount++;
+        const div = document.createElement("div");
+        div.className = "materia";
+        div.innerHTML = `
+          <input type="text" name="materia_nome_${materiaCount}" placeholder="Nome da matéria" required />
+          <input type="number" name="materia_peso_${materiaCount}" placeholder="Peso (1-4)" min="1" max="4" required />
+        `;
+        document.getElementById("materias").appendChild(div);
+      }
+    </script>
+  </body>
+</html>

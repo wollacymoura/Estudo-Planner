@@ -100,32 +100,46 @@ def distribuicao_por_dia():
     return distribuicao_local
 
 # Função que cria um PDF com a rotina de estudos
+
+
 def gerar_pdf(distribuicao_local):
-    # Criação do objeto PDF
-    pdf = FPDF()
+    # Usa orientação paisagem (landscape)
+    pdf = FPDF(orientation='L', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # Título do PDF
     pdf.set_font('Arial', 'B', 16)
-    pdf.cell(200, 10, 'Rotina de Estudos', ln=True, align='C')
-    pdf.ln(10)  # Linha em branco
-    
-    # Definindo o estilo para o corpo do PDF
-    pdf.set_font('Arial', '', 12)
+    pdf.cell(0, 10, 'Rotina de Estudos', ln=True, align='C')
+    pdf.ln(10)
 
-    # Percorrendo cada dia da semana e suas matérias
-    for dia, materias_dia in distribuicao_local.items():
-        pdf.cell(200, 10, dia.capitalize() + ":", ln=True)
-        for materia, tempo in materias_dia.items():
-            pdf.cell(200, 10, f"  - {materia}: {tempo} min", ln=True)
-        pdf.ln(5)  # Espaço entre os dias
+    # Calcula largura das células para preencher a página
+    num_colunas = len(dias_da_semana) + 1  # +1 para coluna "Matéria"
+    page_width = pdf.w - 2 * pdf.l_margin
+    cell_width = page_width / num_colunas
+    cell_height = 10
 
-    # Salvar o arquivo PDF
+    # Cabeçalho da tabela
+    pdf.set_font('Arial', 'B', 10)
+    pdf.cell(cell_width, cell_height, "Matéria", border=1, align='C')
+    for dia in dias_da_semana:
+        pdf.cell(cell_width, cell_height, dia.capitalize(), border=1, align='C')
+    pdf.ln(cell_height)
+
+    # Linhas da tabela: uma para cada matéria
+    pdf.set_font('Arial', '', 10)
+    for materia in materias:
+        pdf.cell(cell_width, cell_height, materia, border=1, align='C')
+        for dia in dias_da_semana:
+            tempo = distribuicao_local[dia][materia]
+            pdf.cell(cell_width, cell_height, f"{tempo} min", border=1, align='C')
+        pdf.ln(cell_height)
+
     pdf.output('rotina_de_estudos.pdf')
     print("\nO PDF com a rotina de estudos foi gerado com sucesso!")
 
 # Função que cria um arquivo .txt com a rotina de estudos
+
+
 def gerar_txt(distribuicao_local):
     # Criação do arquivo .txt
     with open("rotina_de_estudos.txt", "w") as file:
